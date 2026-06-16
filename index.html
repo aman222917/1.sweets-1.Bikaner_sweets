@@ -1,6 +1,305 @@
 <!DOCTYPE html>
-Loading…
 
-Loading Shop…
-Loading Tagline…
- 
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Loading...</title>
+
+<meta name="description" content="">
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+/>
+
+<style>
+
+html{
+scroll-behavior:smooth;
+}
+
+body{
+background:#f8fafc;
+}
+
+.hide{
+display:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="app">
+
+<header
+id="header"
+class="sticky top-0 z-50 bg-white shadow-sm">
+
+<div
+class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+
+<div>
+
+<h1
+id="shopName"
+class="text-2xl font-bold text-orange-600">
+
+Loading Shop...
+
+</h1>
+
+<p
+id="tagLine"
+class="text-sm text-gray-500">
+
+Loading Tagline...
+
+</p>
+
+</div>
+
+<i
+class="fa-solid fa-store text-3xl text-orange-600"> </i>
+
+</div>
+
+</header>
+
+<section
+id="bannerSection">
+</section>
+
+<section
+id="heroRailSection">
+</section>
+
+<section
+id="saleRailSection">
+</section>
+
+<section
+id="productsSection">
+</section>
+
+<section
+id="gallerySection">
+</section>
+
+<section
+id="reviewsSection">
+</section>
+
+<section
+id="contactSection">
+</section>
+
+<footer
+id="footerSection">
+</footer>
+
+</div>
+
+<script>
+
+const SPREADSHEET_ID =
+"1aULDiifd6LFPOms41yWzglTy5-lmowMDISCyFdUo36w";
+
+const SHEETS = {
+
+products:"Sheet1",
+settings:"SiteSettings",
+banner:"BannerCarousel",
+gallery:"Gallery",
+reviews:"Reviews",
+contact:"ContactInfo",
+social:"SocialLinks",
+sections:"Sections",
+seo:"SEO"
+
+};
+
+const state = {
+
+settings:{},
+products:[],
+banner:[],
+gallery:[],
+reviews:[],
+contact:[],
+social:[],
+sections:{},
+seo:{}
+
+};
+
+function getSheetURL(sheet){
+
+return `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${sheet}`;
+
+}
+
+function parseCSV(csv){
+
+const rows=[];
+let row=[];
+let current='';
+let inQuotes=false;
+
+for(let i=0;i<csv.length;i++){
+
+const char=csv[i];
+const next=csv[i+1];
+
+if(char === '"'){
+
+if(inQuotes && next === '"'){
+
+current += '"';
+i++;
+
+}else{
+
+inQuotes=!inQuotes;
+
+}
+
+}else if(char===',' && !inQuotes){
+
+row.push(current);
+current='';
+
+}else if((char === '\n' || char === '\r') && !inQuotes){
+
+if(current || row.length){
+
+row.push(current);
+rows.push(row);
+
+row=[];
+current='';
+
+}
+
+}else{
+
+current+=char;
+
+}
+
+}
+
+if(current || row.length){
+
+row.push(current);
+rows.push(row);
+
+}
+
+return rows;
+
+}
+
+async function loadSheet(sheet){
+
+const response =
+await fetch(
+getSheetURL(sheet)
+);
+
+const csv =
+await response.text();
+
+const rows =
+parseCSV(csv);
+
+const headers =
+rows[0];
+
+return rows
+.slice(1)
+.map(row=>{
+
+const obj={};
+
+headers.forEach(
+(header,index)=>{
+
+obj[
+header.trim()
+] =
+row[index]
+? row[index].trim()
+: '';
+
+});
+
+return obj;
+
+});
+
+}
+
+async function loadSettings(){
+
+const rows =
+await loadSheet(
+SHEETS.settings
+);
+
+rows.forEach(row=>{
+
+state.settings[
+row.Key
+] =
+row.Value;
+
+});
+
+}
+
+async function initialize(){
+
+await loadSettings();
+
+document.title =
+state.settings.ShopName ||
+"Sweet Shop";
+
+document
+.getElementById(
+"shopName"
+)
+.textContent =
+state.settings.ShopName ||
+"Sweet Shop";
+
+document
+.getElementById(
+"tagLine"
+)
+.textContent =
+state.settings.TagLine ||
+"";
+
+console.log(
+"PART 1 LOADED"
+);
+
+}
+
+initialize();
+
+</script>
+
+</body>
+</html>
