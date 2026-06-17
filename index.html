@@ -533,6 +533,9 @@ function csvUrl(sheet){
 // CSV PARSER
 // ═══════════════════════════════════════════════════════════════
 function parseCSV(text){
+  // Normalize ALL line ending styles to \n first
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
   const rows=[];let cur=[],field='',inQ=false;
   for(let i=0;i<text.length;i++){
     const ch=text[i];
@@ -543,9 +546,10 @@ function parseCSV(text){
     } else {
       if(ch==='"'){inQ=true;}
       else if(ch===','){cur.push(field.trim());field='';}
-      else if(ch==='\n'||(ch==='\r'&&text[i+1]==='\n')){
-        if(ch==='\r')i++;
-        cur.push(field.trim());rows.push(cur);cur=[];field='';
+      else if(ch==='\n'){
+        cur.push(field.trim());
+        if(cur.some(c=>c)) rows.push(cur); // skip blank rows
+        cur=[];field='';
       } else {field+=ch;}
     }
   }
@@ -558,7 +562,6 @@ function parseCSV(text){
     return obj;
   });
 }
-
 // ═══════════════════════════════════════════════════════════════
 // FETCH WITH RETRY
 // ═══════════════════════════════════════════════════════════════
