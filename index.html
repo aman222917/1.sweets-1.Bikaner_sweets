@@ -177,6 +177,27 @@ a{text-decoration:none;color:inherit}
 .btn-wa{display:flex;align-items:center;justify-content:center;gap:.45rem;background:#25d366;color:#fff;border:none;padding:.55rem;border-radius:9px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;width:100%;margin-top:auto}
 .btn-wa:hover{background:#1ebe5d;transform:translateY(-1px)}
 .btn-wa i{font-size:1rem}
+  /* ── Compact Card Style ── */
+.grid-compact{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.85rem}
+.card-compact .product-img-wrap{height:110px}
+.card-compact .product-desc{display:none}
+.card-compact .product-name{font-size:.85rem}
+.card-compact .product-category{font-size:.65rem}
+.card-compact .price-discounted{font-size:.95rem}
+.card-compact .btn-wa{font-size:.75rem;padding:.4rem}
+
+/* ── List Card Style ── */
+.grid-list{grid-template-columns:1fr;gap:.6rem}
+.card-list{flex-direction:row;align-items:center;padding:0;height:80px}
+.card-list .product-img-wrap{width:80px;min-width:80px;height:80px;border-radius:var(--radius) 0 0 var(--radius)}
+.card-list .product-body{flex-direction:row;align-items:center;padding:.6rem .9rem;gap:.75rem;flex-wrap:nowrap}
+.card-list .product-desc{display:none}
+.card-list .product-category{display:none}
+.card-list .product-name{font-size:.9rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0}
+.card-list .product-pricing{margin:0;flex-shrink:0}
+.card-list .price-discounted{font-size:.95rem}
+.card-list .btn-wa{width:auto;padding:.4rem .9rem;font-size:.75rem;flex-shrink:0;margin-top:0}
+.card-list .product-badges{top:.3rem;left:.3rem}
 
 /* ── Skeleton ── */
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
@@ -526,6 +547,7 @@ const SHEETS = {
   social:     'SocialLinks',
   sections:   'Sections',
   seo:        'SEO'
+  itemcard:   'ItemCard'
 };
 
 function csvUrl(sheet){
@@ -601,6 +623,7 @@ let STATE={
   lbImages:[],
   lbCurrent:0,
   visibleCount:12
+  itemCardStyle:'large'
 };
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
@@ -1147,6 +1170,20 @@ document.getElementById('menu-toggle').addEventListener('click',()=>{
   document.getElementById('mobile-menu').classList.toggle('open');
 });
 function closeMobileMenu(){document.getElementById('mobile-menu').classList.remove('open');}
+  function buildItemCard(rows){
+  // Find first row where Active = yes (top of list wins)
+  const active=rows.find(r=>isYes(r.Active));
+  if(!active) return; // no yes found, keep default large
+  const style=(active.CardType||'large').toLowerCase().trim();
+  if(['large','compact','list'].includes(style)){
+    STATE.itemCardStyle=style;
+  }
+  // Apply grid class
+  const grid=document.getElementById('product-grid');
+  grid.classList.remove('grid-compact','grid-list');
+  if(style==='compact') grid.classList.add('grid-compact');
+  if(style==='list') grid.classList.add('grid-list');
+}
   function buildNavLinks(){
   const navLinks=document.getElementById('nav-links');
   const mobileMenu=document.getElementById('mobile-menu');
@@ -1196,16 +1233,17 @@ async function init(){
     applySEO(seoRows);
 
     // Load rest in parallel
-    const [products,banners,gallery,reviews,contact,social]=await Promise.all([
+    const [products,banners,gallery,reviews,contact,social,itemcard]=await Promise.all([
       fetchSheet(SHEETS.products),
       fetchSheet(SHEETS.banners),
       fetchSheet(SHEETS.gallery),
       fetchSheet(SHEETS.reviews),
       fetchSheet(SHEETS.contact),
-      fetchSheet(SHEETS.social)
+      fetchSheet(SHEETS.social),
+      fetchSheet(SHEETS.itemcard)
     ]);
-
     buildCarousel(banners);
+    buildItemCard(itemcard);
     buildProducts(products);
     buildGallery(gallery);
     buildReviews(reviews);
