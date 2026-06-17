@@ -710,10 +710,13 @@ function applySEO(rows){
 // SECTIONS TOGGLE
 // ═══════════════════════════════════════════════════════════════
 function applySections(rows){
-  const s={};rows.forEach(r=>{if(r.Section)s[r.Section.toLowerCase()]=(r.Enabled||'yes').toLowerCase();});
+  const s={};rows.forEach(r=>{
+    const key=r.SectionName||r.Section||'';
+    if(key)s[key.toLowerCase()]=(r.Enabled||'yes').toLowerCase();
+  });
   STATE.sections=s;
 }
-function isSectionEnabled(name){
+  function isSectionEnabled(name){
   const v=STATE.sections[name.toLowerCase()];
   return v===undefined||v==='yes';
 }
@@ -725,7 +728,7 @@ function buildCarousel(rows){
   const banners=sortByPriority(rows.filter(r=>isYes(r.Active)));
   const skeleton=document.getElementById('carousel-skeleton');
   const wrap=document.getElementById('carousel-wrap');
-  if(!banners.length||!isSectionEnabled('banner')){skeleton.style.display='none';return;}
+  if(!banners.length||!isSectionEnabled('heroslider')||!isSectionEnabled('banner')){skeleton.style.display='none';return;}
 
   skeleton.style.display='none';
   wrap.style.display='block';
@@ -785,7 +788,7 @@ function buildProducts(rows){
 
   // Hero rail
   const heroes=products.filter(p=>isYes(p.IsHero)).slice(0,5);
-  if(heroes.length&&isSectionEnabled('banner')){
+  if(heroes.length&&isSectionEnabled('featuredproducts')){
     document.getElementById('hero-rail').style.display='block';
     const track=document.getElementById('hero-rail-track');
     track.innerHTML=heroes.map(p=>`
@@ -803,7 +806,7 @@ function buildProducts(rows){
 
   // Sale rail
   const sale=products.filter(p=>isYes(p.IsSale));
-  if(sale.length&&isSectionEnabled('banner')){
+  if(sale.length&&isSectionEnabled('flashsale')){
     document.getElementById('sale-section').style.display='block';
     const track=document.getElementById('sale-track');
     track.innerHTML=sale.map(p=>{
