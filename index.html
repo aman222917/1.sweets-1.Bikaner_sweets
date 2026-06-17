@@ -755,8 +755,7 @@ function buildCarousel(rows){
           <div class="slide-eyebrow">🍬 Premium Sweets</div>
           <h1 class="slide-title">${b.Title||'Welcome to Our Sweet Shop'}</h1>
           <p class="slide-subtitle">${b.Subtitle||'Authentic flavours, crafted with love.'}</p>
-          <a href="https://wa.me/${STATE.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent('Hi, I want to place an order!')}" target="_blank" rel="noopener" class="slide-cta"><i class="fab fa-whatsapp"></i> Order on WhatsApp</a>
-        </div>
+          <a href="https://wa.me/${STATE.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(`Hi, I am interested in ${b.Title||'your sweets'}. Please share more details!`)}" target="_blank" rel="noopener" class="slide-cta"><i class="fab fa-whatsapp"></i> Order on WhatsApp</a>        </div>
       </div>`;
     track.appendChild(slide);
     const dot=document.createElement('div');
