@@ -188,20 +188,29 @@ a{text-decoration:none;color:inherit}
 
 /* ── List Card Style ── */
 .grid-list{grid-template-columns:1fr;gap:.5rem}
-.card-list{flex-direction:row;align-items:stretch;padding:0;min-height:90px;height:auto}
-.card-list .product-img-wrap{width:90px;min-width:90px;height:auto;min-height:90px;border-radius:var(--radius) 0 0 var(--radius);flex-shrink:0}
-.card-list .product-img-wrap img{width:90px;height:100%;object-fit:cover}
-.card-list .product-badges{display:none}
-.card-list .product-body{flex-direction:column;align-items:flex-start;justify-content:center;padding:.5rem .75rem;gap:.2rem;flex:1;min-width:0;flex-wrap:nowrap}
-.card-list .product-desc{display:none}
-.card-list .product-category{display:none}
-.card-list .product-name{font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;max-width:100%}
-.card-list .product-pricing{margin:0;flex-shrink:0;display:flex;align-items:center;gap:.3rem}
-.card-list .price-discounted{font-size:.9rem}
-.card-list .price-original{font-size:.75rem}
-.card-list .price-unit{font-size:.7rem}
-.card-list .btn-wa{width:100%;padding:.35rem .5rem;font-size:.75rem;margin-top:.3rem;border-radius:7px;justify-content:center}
-  
+.grid-list .card-list{flex-direction:row;align-items:stretch;padding:0;min-height:80px;height:auto}
+.grid-list .card-list .product-img-wrap{width:85px;min-width:85px;height:auto;border-radius:var(--radius) 0 0 var(--radius);flex-shrink:0;overflow:hidden}
+.grid-list .card-list .product-img-wrap img{width:85px;height:100%;object-fit:cover;min-height:80px}
+.grid-list .card-list .product-badges{display:none}
+.grid-list .card-list .product-body{flex-direction:row;align-items:center;padding:.5rem .7rem;gap:.6rem;flex:1;min-width:0;flex-wrap:nowrap}
+.grid-list .card-list .product-desc{display:none}
+.grid-list .card-list .product-category{display:none}
+.grid-list .card-list .product-name{font-size:.88rem;font-weight:700;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid-list .card-list .product-pricing{display:flex;flex-direction:column;align-items:flex-end;gap:.1rem;flex-shrink:0;margin:0}
+.grid-list .card-list .price-discounted{font-size:.9rem;font-weight:800}
+.grid-list .card-list .price-original{font-size:.72rem}
+.grid-list .card-list .price-unit{font-size:.68rem;color:var(--text-muted)}
+.grid-list .card-list .btn-wa-list{display:inline-flex;align-items:center;justify-content:center;background:#25d366;color:#fff;border:none;width:36px;height:36px;border-radius:50%;font-size:1rem;cursor:pointer;flex-shrink:0;transition:background .2s;text-decoration:none}
+.grid-list .card-list .btn-wa-list:hover{background:#1ebe5d}
+.grid-list .card-list .btn-wa{display:none}
+
+/* Desktop — 2 columns for list view on wider screens */
+@media(min-width:640px){
+  .grid-list{grid-template-columns:repeat(2,1fr)}
+}
+@media(min-width:1024px){
+  .grid-list{grid-template-columns:repeat(3,1fr)}
+}  
 /* ── Skeleton ── */
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -914,7 +923,10 @@ function productCardHTML(p){
         <span class="price-unit">/ ${p.Unit||'unit'}</span>
       </div>
       <a href="${waLink(p)}" target="_blank" rel="noopener" class="btn-wa" aria-label="Order ${p.ItemName} on WhatsApp">
-        <i class="fab fa-whatsapp"></i> Order on WhatsApp
+        <i class="fab fa-whatsapp"></i> Order
+      </a>
+      <a href="${waLink(p)}" target="_blank" rel="noopener" class="btn-wa-list" aria-label="Order ${p.ItemName} on WhatsApp" title="Order on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
       </a>
     </div>
   </article>`;
