@@ -187,18 +187,21 @@ a{text-decoration:none;color:inherit}
 .card-compact .btn-wa{font-size:.75rem;padding:.4rem}
 
 /* ── List Card Style ── */
-.grid-list{grid-template-columns:1fr;gap:.6rem}
-.card-list{flex-direction:row;align-items:center;padding:0;height:80px}
-.card-list .product-img-wrap{width:80px;min-width:80px;height:80px;border-radius:var(--radius) 0 0 var(--radius)}
-.card-list .product-body{flex-direction:row;align-items:center;padding:.6rem .9rem;gap:.75rem;flex-wrap:nowrap}
+.grid-list{grid-template-columns:1fr;gap:.5rem}
+.card-list{flex-direction:row;align-items:stretch;padding:0;min-height:90px;height:auto}
+.card-list .product-img-wrap{width:90px;min-width:90px;height:auto;min-height:90px;border-radius:var(--radius) 0 0 var(--radius);flex-shrink:0}
+.card-list .product-img-wrap img{width:90px;height:100%;object-fit:cover}
+.card-list .product-badges{display:none}
+.card-list .product-body{flex-direction:column;align-items:flex-start;justify-content:center;padding:.5rem .75rem;gap:.2rem;flex:1;min-width:0;flex-wrap:nowrap}
 .card-list .product-desc{display:none}
 .card-list .product-category{display:none}
-.card-list .product-name{font-size:.9rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0}
-.card-list .product-pricing{margin:0;flex-shrink:0}
-.card-list .price-discounted{font-size:.95rem}
-.card-list .btn-wa{width:auto;padding:.4rem .9rem;font-size:.75rem;flex-shrink:0;margin-top:0}
-.card-list .product-badges{top:.3rem;left:.3rem}
-
+.card-list .product-name{font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;max-width:100%}
+.card-list .product-pricing{margin:0;flex-shrink:0;display:flex;align-items:center;gap:.3rem}
+.card-list .price-discounted{font-size:.9rem}
+.card-list .price-original{font-size:.75rem}
+.card-list .price-unit{font-size:.7rem}
+.card-list .btn-wa{width:100%;padding:.35rem .5rem;font-size:.75rem;margin-top:.3rem;border-radius:7px;justify-content:center}
+  
 /* ── Skeleton ── */
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
