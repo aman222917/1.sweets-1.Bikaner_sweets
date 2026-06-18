@@ -546,7 +546,10 @@ footer{background:#1a1a1a;color:#ccc;padding:2.5rem 1.25rem 1.5rem}
 // ═══════════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
-const SHEET_ID = '1aULDiifd6LFPOms41yWzglTy5-lmowMDISCyFdUo36w';
+const PARENT_SHEET_ID = '1Z1kjq6c4hLitXLr0p5w9bpOskEKdvIoNK5miPY5OJsI';
+const FALLBACK_SHEET_ID = '1aULDiifd6LFPOms41yWzglTy5-lmowMDISCyFdUo36w';
+let SHEET_ID = FALLBACK_SHEET_ID; // will be overridden by Parent Sheet
+  
 const SHEETS = {
   products:   'Products',
   settings:   'SiteSettings',
@@ -561,10 +564,44 @@ const SHEETS = {
   ctacontrol: 'CtaControl'
 };
 
-function csvUrl(sheet){
-  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}`;
+  async function loadActiveSheetID(){
+  try{
+    // Fetch ConfigSelector tab from Parent Sheet
+    const url=`https://docs.google.com/spreadsheets/d/${PARENT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ConfigSelector&_=${Date.now()}`;
+    const res=await fetch(url);
+    if(!res.ok) throw new Error('Parent sheet fetch failed');
+    const rows=parseCSV(await res.text());
+
+    // Find first row where Active = yes
+    const active=rows.find(r=>isYes(r.Active));
+    if(active&&active.SheetID&&active.SheetID.trim()){
+      SHEET_ID=active.SheetID.trim();
+      console.log('Loaded config sheet:',active.SheetName||SHEET_ID);
+    } else {
+      // Try ParentSettings for fallback
+      const url2=`https://docs.google.com/spreadsheets/d/${PARENT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ParentSettings&_=${Date.now()}`;
+      const res2=await fetch(url2);
+      if(res2.ok){
+        const rows2=parseCSV(await res2.text());
+        const fb=rows2.find(r=>r.Key==='FallbackSheetID');
+        if(fb&&fb.Value) SHEET_ID=fb.Value.trim();
+      }
+    }
+  } catch(e){
+    console.warn('Parent sheet failed, using fallback:',e);
+    SHEET_ID=FALLBACK_SHEET_ID;
+  }
 }
 
+function csvUrl(sheet){
+  const bust = Date.now();
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}&_=${bust}`;
+}
+
+function parentCsvUrl(sheet){
+  const bust = Date.now();
+  return `https://docs.google.com/spreadsheets/d/${PARENT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}&_=${bust}`;
+}
 // ═══════════════════════════════════════════════════════════════
 // CSV PARSER
 // ═══════════════════════════════════════════════════════════════
@@ -1267,8 +1304,11 @@ async function init(){
   injectSkeletons(8);
 
   try{
-    // Load settings and sections first (fast, small sheets)
-    const [settingsRows,sectionsRows,seoRows]=await Promise.all([
+    // Step 1 — Load Parent Sheet to find which config sheet to use
+    await loadActiveSheetID();
+
+    // Step 2 — Now load all config from the active sheet
+    const [settingsRows,sectionsRows,seoRows]=await Promise.all([      
       fetchSheet(SHEETS.settings),
       fetchSheet(SHEETS.sections),
       fetchSheet(SHEETS.seo)
