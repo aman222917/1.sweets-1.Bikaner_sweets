@@ -557,7 +557,8 @@ const SHEETS = {
   social:     'SocialLinks',
   sections:   'Sections',
   seo:        'SEO',
-  itemcard:   'ItemCard'
+  itemcard:   'ItemCard',
+  ctacontrol: 'CtaControl'
 };
 
 function csvUrl(sheet){
@@ -633,8 +634,10 @@ let STATE={
   lbImages:[],
   lbCurrent:0,
   visibleCount:12,
-  itemCardStyle:'large'
+  itemCardStyle:'large',
+  cta:{carousel:true, toppicks:true, sale:true, shop:true}
 };
+  
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════════
@@ -782,7 +785,7 @@ function buildCarousel(rows){
           <div class="slide-eyebrow">🍬 Premium Sweets</div>
           <h1 class="slide-title">${b.Title||'Welcome to Our Sweet Shop'}</h1>
           <p class="slide-subtitle">${b.Subtitle||'Authentic flavours, crafted with love.'}</p>
-          <a href="https://wa.me/${STATE.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(`Hi, I am interested in ${b.Title||'your sweets'}. Please share more details!`)}" target="_blank" rel="noopener" class="slide-cta"><i class="fab fa-whatsapp"></i> Order on WhatsApp</a>        </div>
+          ${STATE.cta.carousel?`<a href="https://wa.me/${STATE.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(`Hi, I am interested in ${b.Title||'your sweets'}. Please share more details!`)}" target="_blank" rel="noopener" class="slide-cta"><i class="fab fa-whatsapp"></i> Order on WhatsApp</a>`:''}        </div>
       </div>`;
     track.appendChild(slide);
     const dot=document.createElement('div');
@@ -835,9 +838,7 @@ function buildProducts(rows){
             <span class="hero-product-price">₹${p.DiscountPrice||p.OriginalPrice}</span>
             ${p.OriginalPrice&&p.DiscountPrice&&Number(p.OriginalPrice)>Number(p.DiscountPrice)?`<span class="hero-product-orig">₹${p.OriginalPrice}</span>`:''}
           </div>
-          <a href="${waLink(p)}" target="_blank" rel="noopener" class="hero-product-wa">
-            <i class="fab fa-whatsapp"></i> Order on WhatsApp
-          </a>
+          ${STATE.cta.topicks?`<a href="${waLink(p)}" target="_blank" rel="noopener" class="hero-product-wa"><i class="fab fa-whatsapp"></i> Order on WhatsApp</a>`:''}
         </div>
       </div>`).join('');    
   }
@@ -858,10 +859,7 @@ function buildProducts(rows){
             ${p.OriginalPrice&&p.DiscountPrice&&Number(p.OriginalPrice)>Number(p.DiscountPrice)?`<span class="sale-orig">₹${p.OriginalPrice}</span>`:''}
             ${saving>0?`<span class="save-badge">Save ₹${saving}</span>`:''}
           </div>
-          <a href="${waLink(p)}" target="_blank" rel="noopener" class="btn-wa" style="margin-top:.5rem;font-size:.75rem;padding:.4rem .6rem">
-            <i class="fab fa-whatsapp"></i> Order
-          </a>
-        </div>
+          ${STATE.cta.sale?`<a href="${waLink(p)}" target="_blank" rel="noopener" class="btn-wa" style="margin-top:.5rem;font-size:.75rem;padding:.4rem .6rem"><i class="fab fa-whatsapp"></i> Order</a>`:''}        </div>
       </div>`;
     }).join('');
   }
@@ -923,12 +921,8 @@ function productCardHTML(p){
         ${hasSave?`<span class="price-original">₹${orig}</span>`:''}
         <span class="price-unit">/ ${p.Unit||'unit'}</span>
       </div>
-      <a href="${waLink(p)}" target="_blank" rel="noopener" class="btn-wa" aria-label="Order ${p.ItemName} on WhatsApp">
-        <i class="fab fa-whatsapp"></i> Order
-      </a>
-      <a href="${waLink(p)}" target="_blank" rel="noopener" class="btn-wa-list" aria-label="Order ${p.ItemName} on WhatsApp" title="Order on WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-      </a>
+      ${STATE.cta.shop?`<a href="${waLink(p)}" target="_blank" rel="noopener" class="btn-wa" aria-label="Order ${p.ItemName} on WhatsApp"><i class="fab fa-whatsapp"></i> Order</a>`:''}
+      ${STATE.cta.shop?`<a href="${waLink(p)}" target="_blank" rel="noopener" class="btn-wa-list" aria-label="Order ${p.ItemName} on WhatsApp" title="Order on WhatsApp"><i class="fab fa-whatsapp"></i></a>`:''}
     </div>
   </article>`;
 }
@@ -1191,6 +1185,16 @@ document.getElementById('menu-toggle').addEventListener('click',()=>{
   document.getElementById('mobile-menu').classList.toggle('open');
 });
 function closeMobileMenu(){document.getElementById('mobile-menu').classList.remove('open');}
+function buildCtaControl(rows){
+  rows.forEach(r=>{
+    const key=(r.Key||'').toLowerCase().trim();
+    const val=isYes(r.Value);
+    if(key==='carouselcta') STATE.cta.carousel=val;
+    if(key==='toppickscta') STATE.cta.topicks=val;
+    if(key==='salecta')     STATE.cta.sale=val;
+    if(key==='shopcta')     STATE.cta.shop=val;
+  });
+}
   function buildItemCard(rows){
   const active=rows.find(r=>isYes(r.Active));
   if(!active) return;
@@ -1276,18 +1280,21 @@ async function init(){
     applySEO(seoRows);
 
     // Load rest in parallel
-    const [products,banners,gallery,reviews,contact,social,itemcard]=await Promise.all([
+    const [products,banners,gallery,reviews,contact,social,itemcard,ctacontrol]=await Promise.all([
       fetchSheet(SHEETS.products),
       fetchSheet(SHEETS.banners),
       fetchSheet(SHEETS.gallery),
       fetchSheet(SHEETS.reviews),
       fetchSheet(SHEETS.contact),
       fetchSheet(SHEETS.social),
-      fetchSheet(SHEETS.itemcard)
+      fetchSheet(SHEETS.itemcard),
+      fetchSheet(SHEETS.ctacontrol)
     ]);
+    
+    buildCtaControl(ctacontrol);
     buildCarousel(banners);
     buildItemCard(itemcard);
-    buildProducts(products);
+    buildProducts(products);    
     buildGallery(gallery);
     buildReviews(reviews);
     buildAbout();
